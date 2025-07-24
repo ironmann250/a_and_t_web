@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paychex Login | Secure Access</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <!-- Exchange Rates Marquee -->
+    <div class="fixed top-0 left-0 right-0 bg-blue-600 text-white py-0.5 px-2 text-sm z-50">
+        <marquee id="exchangeRates" behavior="scroll" direction="left" scrollamount="4">
+            Loading exchange rates...
+        </marquee>
+    </div>
+
+
+    <main class="pt-6">
+        <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+            <div class="flex justify-center">
+                <a href="index.html"><img class="h-16" src="assets/images/bannerlogo.jpg" alt="Paychex Logo"></a>
+            </div>
+            
+            <form action="/authenticate" method="POST" class="mt-8 space-y-6">
+                <div class="space-y-4">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                        <input id="username" name="username" type="text" required
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Enter your username">
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                        <input id="password" name="password" type="password" required
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Enter your password">
+                    </div>
+
+                    <div class="flex items-center">
+                        <input id="remember-me" name="remember-me" type="checkbox"
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember me</label>
+                    </div>
+                    </div>
+
+                    <div>
+                    <button type="submit"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Sign In
+                    </button>
+                </div>
+                </form>
+
+                <div class="flex justify-center space-x-4 text-sm">
+                <a href="/forgot-password" class="font-medium text-blue-600 hover:text-blue-500">Forgot Password?</a>
+                <span class="text-gray-500">|</span>
+                <a href="/help" class="font-medium text-blue-600 hover:text-blue-500">Need Help?</a>
+            </div>
+
+            <div class="mt-6 text-center text-sm">
+                <p class="text-gray-600">New to Paychex? <a href="register.html" class="font-medium text-blue-600 hover:text-blue-500">Create an account</a></p>
+            </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-100 mt-12">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="flex space-x-4">
+                    <a href="https://www.paychex.com/corporate/security/privacy" class="text-gray-600 hover:text-gray-900">Privacy</a>
+                    <a href="https://www.paychex.com/corporate/security" class="text-gray-600 hover:text-gray-900">Security</a>
+                    <a href="https://www.paychex.com/corporate/trademarks" class="text-gray-600 hover:text-gray-900">Trademarks & Disclaimers</a>
+                    <a href="https://www.paychex.com/corporate/legal" class="text-gray-600 hover:text-gray-900">Legal</a>
+                </div>
+                <div class="mt-4 md:mt-0 text-sm text-gray-500">
+                    © 2025 Paychex Inc. All Rights Reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/login.js"></script>
+    <script>
+        // Simple marquee with default rates
+        document.addEventListener('DOMContentLoaded', () => {
+            const ratesContainer = document.getElementById('exchangeRates');
+            if (!ratesContainer) return;
+            
+            // Default rates
+            const defaultRates = [
+                '🇪🇹 55.5 ETB', '🇺🇬 3700 UGX', '🇰🇪 120 KES', '🇪🇬 30.8 EGP',
+                '🇳🇬 450 NGN', '🇬🇭 6.2 GHS', '🇿🇦 18.5 ZAR', '🇹🇿 2300 TZS',
+                '🇷🇼 1050 RWF', '🇸🇩 55 SDG', '🇩🇿 135 DZD', '🇲🇦 10.2 MAD'
+            ].join(' &nbsp;&nbsp;&nbsp;&nbsp; ');
+
+            // Set initial content (duplicated for continuous scrolling)
+            ratesContainer.innerHTML = defaultRates + ' &nbsp;&nbsp;&nbsp;&nbsp; ' + defaultRates;
+
+            // Optional: Periodically update rates
+            setInterval(() => {
+                fetch('https://api.exchangerate-api.com/v4/latest/USD')
+                    .then(response => response.json())
+                    .then(data => {
+                        const countries = [
+                            {code: 'ETB', flag: '🇪🇹'}, {code: 'UGX', flag: '🇺🇬'},
+                            {code: 'KES', flag: '🇰🇪'}, {code: 'EGP', flag: '🇪🇬'},
+                            {code: 'NGN', flag: '🇳🇬'}, {code: 'GHS', flag: '🇬🇭'},
+                            {code: 'ZAR', flag: '🇿🇦'}, {code: 'TZS', flag: '🇹🇿'},
+                            {code: 'RWF', flag: '🇷🇼'}, {code: 'SDG', flag: '🇸🇩'},
+                            {code: 'DZD', flag: '🇩🇿'}, {code: 'MAD', flag: '🇲🇦'}
+                        ];
+
+                        const ratesText = countries.map(country => {
+                            const rate = data.rates[country.code] ? (1 / data.rates[country.code]).toFixed(2) : '--';
+                            return `${country.flag} ${rate} ${country.code}`;
+                        }).join(' &nbsp;&nbsp;&nbsp;&nbsp; ');
+
+                        if (ratesContainer.innerHTML.indexOf(ratesText) === -1) {
+                            ratesContainer.innerHTML = ratesText + ' &nbsp;&nbsp;&nbsp;&nbsp; ' + ratesText;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching exchange rates:', error);
+                    });
+            }, 300000); // Update every 5 minutes
+        });
+    </script>
+</body>
+</html>

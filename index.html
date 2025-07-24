@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A&T Services</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="js/auth.js"></script>
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <style>
+        .swiper {
+            width: 100%;
+            height: 500px;
+            margin: 0;
+        }
+        .swiper-slide {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        .swiper-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.9);
+        }
+        .swiper-button-prev,
+        .swiper-button-next {
+            color: white;
+            background: rgba(0,0,0,0.5);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .swiper-button-prev:hover,
+        .swiper-button-next:hover {
+            background: rgba(0,0,0,0.8);
+        }
+        .swiper-button-prev::after,
+        .swiper-button-next::after {
+            font-size: 20px;
+        }
+        .swiper-pagination-bullet {
+            background: white;
+            opacity: 0.7;
+            width: 12px;
+            height: 12px;
+        }
+        .swiper-pagination-bullet-active {
+            background: #2563eb;
+            opacity: 1;
+        }
+        .slide-content {
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            transform: translateY(-50%);
+            max-width: 600px;
+            padding: 2rem;
+            background: rgba(0,0,0,0.6);
+            border-radius: 8px;
+            color: white;
+        }
+        .slide-content h3 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .slide-content p {
+            font-size: 1.25rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Exchange Rates Marquee -->
+    <div class="fixed top-0 left-0 right-0 bg-blue-600 text-white py-0.5 px-2 text-sm z-50">
+        <marquee id="exchangeRates" behavior="scroll" direction="left" scrollamount="4">
+            Loading exchange rates...
+        </marquee>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-6 left-0 right-0 bg-white shadow-md z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo left -->
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <img class="h-8 w-auto" src="assets/images/bannerlogo.jpg" alt="Home">
+                    </div>
+                </div>
+
+                <!-- Center menu items -->
+                <div class="hidden md:flex md:items-center md:justify-center md:flex-1">
+                    <div class="flex space-x-8">
+                        <a href="#" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                        <a href="services.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Services</a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">About</a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Contact</a>
+                    </div>
+                </div>
+
+                <div class="flex items-center">
+                    <div id="loggedOutView" class="flex space-x-4">
+                        <a href="login.html" class="bg-white text-blue-800 px-4 py-2 rounded border border-blue-800 hover:bg-blue-50 transition-colors text-sm font-medium">Log in</a>
+                        <a href="register.html" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors text-sm font-medium">Sign up</a>
+                    </div>
+                    <div id="loggedInView" class="hidden relative">
+                        <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold cursor-pointer" id="userInitials">AB</div>
+                        <div class="hidden absolute right-0 top-12 bg-white shadow-lg rounded w-48 z-50" id="userDropdown">
+                            <div class="px-4 py-2 border-b">
+                                <strong id="userFullName">User Name</strong>
+                            </div>
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-100" onclick="handleLogout()">Log out</a>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="md:hidden text-gray-700 focus:outline-none" id="mobileMenuButton">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="hidden md:hidden bg-white shadow-lg fixed top-[5rem] right-4 z-[60] w-auto min-w-[200px] max-w-[80vw]" id="mobileMenu">
+        <div class="px-4 py-2 flex flex-col space-y-3">
+            <a href="#" class="text-gray-700 hover:text-blue-800 whitespace-nowrap">Home</a>
+            <a href="services.html" class="text-gray-700 hover:text-blue-800 whitespace-nowrap">Services</a>
+            <a href="#" class="text-gray-700 hover:text-blue-800 whitespace-nowrap">About</a>
+            <a href="#" class="text-gray-700 hover:text-blue-800 whitespace-nowrap">Contact</a>
+        </div>
+    </div>
+
+    <main class="pt-[5.5rem] pb-8">
+        <div class="container mx-auto px-4">
+            <!-- Swiper Slideshow Section -->
+            <div class="mb-12">
+                <div class="swiper">
+                    <div class="swiper-wrapper">
+                        <!-- Money Transfer Slide -->
+                        <div class="swiper-slide">
+                            <img src="assets/images/slide1.jpg" alt="Money Transfer">
+                            <div class="slide-content">
+                                <h3>International Money Transfers</h3>
+                                <p>Send money around the world—quickly, safely, and affordably.</p>
+                            </div>
+                        </div>
+
+                        <!-- Bookkeeping Slide -->
+                        <div class="swiper-slide">
+                            <img src="assets/images/slide2.jpg" alt="Bookkeeping and Payroll">
+                            <div class="slide-content">
+                                <h3>Bookkeeping and Payroll Services</h3>
+                                <p>Keep Your Business Organized, Compliant, and Profitable</p>
+                            </div>
+                        </div>
+
+                        <!-- Tax Filing Slide -->
+                        <div class="swiper-slide">
+                            <img src="assets/images/slide3.jpg" alt="Tax Filing">
+                            <div class="slide-content">
+                                <h3>Tax Filing Services</h3>
+                                <p>Accurate. Fast. Reliable.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation buttons -->
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+                    
+                    <!-- Pagination dots -->
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+
+            <!-- Services Section -->
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold mb-4">Our Services</h2>
+                <p class="text-gray-600 mb-8">We offer a range of professional services to help individuals and businesses succeed.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Money Transfer Card -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition-all hover:scale-[1.02] hover:shadow-xl hover:border-2 hover:border-blue-400">
+                        <img src="assets/images/cards-payroll.jpeg" alt="Money Transfer" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">Money Transfer</h3>
+                            <p class="text-gray-600">Send money around the world—quickly, safely, and affordably.</p>
+                        </div>
+                    </div>
+
+                    <!-- Bookkeeping Card -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition-all hover:scale-[1.02] hover:shadow-xl hover:border-2 hover:border-blue-400">
+                        <img src="assets/images/cards-generic-5.jpg" alt="Bookkeeping and Payroll" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">Bookkeeping & Payroll</h3>
+                            <p class="text-gray-600">Keep your business organized, compliant, and profitable.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tax Filing Card -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition-all hover:scale-[1.02] hover:shadow-xl hover:border-2 hover:border-blue-400">
+                        <img src="assets/images/hr-interface-card.jpeg" alt="Tax Filing" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">Tax Filing</h3>
+                            <p class="text-gray-600">Accurate returns. On-time filing. Maximum refund.</p>
+                        </div>
+                    </div>
+
+                    <!-- Cleaning Services Card -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition-all hover:scale-[1.02] hover:shadow-xl hover:border-2 hover:border-blue-400">
+                        <img src="assets/images/cards-employee-benefits.jpeg" alt="Cleaning Services" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">Cleaning Services</h3>
+                            <p class="text-gray-600">Clean spaces. Healthy environments. Impressive results.</p>
+                        </div>
+                    </div>
+
+                    <!-- Marketing Card -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition-all hover:scale-[1.02] hover:shadow-xl hover:border-2 hover:border-blue-400">
+                        <img src="assets/images/cards-time-and-attendance.jpeg" alt="Marketing & Promotion" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">Marketing & Promotion</h3>
+                            <p class="text-gray-600">Reach more customers and increase sales.</p>
+                        </div>
+                    </div>
+
+                    <!-- USCIS Support Card -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden transform transition-all hover:scale-[1.02] hover:shadow-xl hover:border-2 hover:border-blue-400">
+                        <img src="assets/images/cards-hiring-onboarding.jpeg" alt="USCIS Support" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">USCIS Support Services</h3>
+                            <p class="text-gray-600">Professional assistance with USCIS forms and applications.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonials Section -->
+            <div class="py-16 px-4 bg-gradient-to-r from-blue-50 to-blue-100">
+                <div class="container mx-auto">
+                    <h2 class="text-4xl font-bold mb-12 text-center text-indigo-900">What Our Customers Say</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                        <div class="bg-white p-8 rounded-xl shadow-xl transform transition-all hover:scale-[1.02] hover:shadow-2xl">
+                            <div class="flex items-center mb-6">
+                                <div class="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-2xl font-bold mr-4">S</div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-800">Sam, Ethiopian expat in Minnesota</h3>
+                                    <p class="text-indigo-600">Regular Customer</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 italic relative pl-6 before:content-'"' before:absolute before:left-0 before:top-0 before:text-4xl before:text-indigo-200 before:font-serif">
+                                I send money to my parents in Addis every month. It always arrives on time, and they can pick it up without any stress.
+                            </p>
+                            <div class="flex mt-4 text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-8 rounded-xl shadow-xl transform transition-all hover:scale-[1.02] hover:shadow-2xl">
+                            <div class="flex items-center mb-6">
+                                <div class="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-2xl font-bold mr-4">M</div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-800">Meseret, Nurse in Minnesota</h3>
+                                    <p class="text-indigo-600">Business Customer</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 italic relative pl-6 before:content-'"' before:absolute before:left-0 before:top-0 before:text-4xl before:text-indigo-200 before:font-serif">
+                                Bank transfer to Ethiopia take less than 5 minutes. Best rates and always reliable.
+                            </p>
+                            <div class="flex mt-4 text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gradient-to-r from-blue-800 to-blue-600 text-white py-8 border-t border-blue-700">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="flex space-x-6 mb-4 md:mb-0">
+                    <a href="#" class="text-indigo-200 hover:text-white transition-colors">Privacy</a>
+                    <a href="#" class="text-indigo-200 hover:text-white transition-colors">Security</a>
+                    <a href="#" class="text-indigo-200 hover:text-white transition-colors">Legal</a>
+                    <a href="#" class="text-indigo-200 hover:text-white transition-colors">Contact</a>
+                </div>
+                <div class="flex space-x-6 mb-4 md:mb-0">
+                    <a href="#" class="text-white hover:text-indigo-200 transition-colors">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="text-white hover:text-indigo-200 transition-colors">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="text-white hover:text-indigo-200 transition-colors">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="#" class="text-white hover:text-indigo-200 transition-colors">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+                <div class="text-sm text-indigo-200">
+                    &copy; 2025 A&T Services. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // User dropdown toggle
+            const userCircle = document.getElementById('userInitials');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            userCircle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userDropdown.classList.toggle('hidden');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', () => {
+                userDropdown.classList.add('hidden');
+            });
+        });
+
+        // Initialize Swiper with proper configuration
+        document.addEventListener('DOMContentLoaded', () => {
+            const swiper = new Swiper('.swiper', {
+                loop: true,
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: true,
+                    waitForTransition: true
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                    dynamicBullets: true,
+                },
+                slidesPerView: 1,
+                spaceBetween: 20,
+                centeredSlides: true,
+                effect: 'slide',
+                speed: 600,
+                // Smooth dragging behavior
+                touchEventsTarget: 'wrapper',
+                touchRatio: 1,
+                touchAngle: 45,
+                simulateTouch: true,
+                shortSwipes: false,
+                longSwipes: true,
+                longSwipesRatio: 0.3,
+                followFinger: true,
+                grabCursor: true,
+                resistance: false,
+                // Disable transitions during drag
+                watchSlidesProgress: true,
+                preventInteractionOnTransition: false,
+                // Responsive settings
+                breakpoints: {
+                    768: {
+                        touchRatio: 0.7
+                    }
+                }
+            });
+
+            // Handle drag events smoothly
+            swiper.on('sliderMove', () => {
+                swiper.autoplay.stop();
+            });
+            swiper.on('touchEnd', () => {
+                setTimeout(() => {
+                    swiper.autoplay.start();
+                }, 1000);
+            });
+        });
+    </script>
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+</body>
+</html>

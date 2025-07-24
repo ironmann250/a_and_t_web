@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Paychex</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .content-section {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .content-section:not(.is-active) {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .content-section.is-active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Exchange Rates Marquee -->
+    <div class="fixed top-0 left-0 right-0 bg-blue-600 text-white py-0.5 px-2 text-sm z-50">
+        <marquee id="exchangeRates" behavior="scroll" direction="left" scrollamount="4">
+            Loading exchange rates...
+        </marquee>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-6 left-0 right-0 bg-white shadow-md z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo left -->
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <img class="h-8 w-auto" src="assets/images/bannerlogo.jpg" alt="Logo">
+                    </div>
+                </div>
+
+                <!-- Center menu items -->
+                <div class="hidden md:flex md:items-center md:justify-center md:flex-1">
+                    <div class="flex space-x-8">
+                        <a href="index.html" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Services</a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">About</a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Contact</a>
+                    </div>
+                </div>
+
+                <!-- User menu right -->
+                <div class="flex items-center">
+                    <div class="relative">
+                        <div class="flex items-center space-x-2 cursor-pointer" id="userInitials">
+                            <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">JD</div>
+                            <div class="flex items-center bg-blue-50 px-3 py-1 rounded-full">
+                                <span class="text-sm font-medium" id="userFullName">John Doe</span>
+                                <svg class="w-4 h-4 ml-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="hidden absolute right-0 top-12 bg-white shadow-lg rounded w-48 z-[60]" id="userDropdown">
+                            <div class="px-4 py-2 border-b">
+                                <strong id="userFullName">John Doe</strong>
+                            </div>
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-100">Settings</a>
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-100" onclick="handleLogout()">Logout</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="-mr-2 flex items-center md:hidden">
+                    <button type="button"
+                        id="mobileMenuButton"
+                        aria-controls="mobileMenu"
+                        aria-expanded="false"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="hidden md:hidden bg-white shadow-lg fixed top-[5rem] right-4 z-[60] w-auto min-w-[200px] max-w-[80vw]" id="mobileMenu">
+            <div class="px-4 py-2 flex flex-col space-y-3">
+                <a href="index.html" class="text-gray-700 hover:text-blue-800 whitespace-nowrap">Home</a>
+                <a href="#" class="text-gray-700 hover:text-blue-800 whitespace-nowrap">Services</a>
+                <a href="#" class="text-gray-700 hover:text-blue-800 whitespace-nowrap">About</a>
+                <a href="#" class="text-gray-700 hover:text-blue-800 whitespace-nowrap">Contact</a>
+                <div class="pt-2 border-t">
+                    <a href="#" class="block px-2 py-1 text-gray-700 hover:text-blue-800">Profile</a>
+                    <a href="#" class="block px-2 py-1 text-gray-700 hover:text-blue-800">Settings</a>
+                    <a href="#" class="block px-2 py-1 text-gray-700 hover:text-blue-800" onclick="handleLogout()">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile menu toggle
+            const mobileMenuButton = document.querySelector('[aria-controls="mobileMenu"]');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    mobileMenu.classList.toggle('hidden');
+                    mobileMenuButton.setAttribute('aria-expanded',
+                        mobileMenu.classList.contains('hidden') ? 'false' : 'true');
+                });
+
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenuButton.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+
+            // User dropdown toggle
+            const userInitials = document.getElementById('userInitials');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            if (userInitials && userDropdown) {
+                userInitials.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('hidden');
+                    userInitials.setAttribute('aria-expanded',
+                        userDropdown.classList.contains('hidden') ? 'false' : 'true');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!userDropdown.contains(e.target) && !userInitials.contains(e.target)) {
+                        userDropdown.classList.add('hidden');
+                        userInitials.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                // Close dropdown on escape key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        userDropdown.classList.add('hidden');
+                        userInitials.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+
+            // Section switching functionality
+            const sidebarLinks = document.querySelectorAll('[data-section]');
+            const contentSections = document.querySelectorAll('.content-section');
+            
+            function showSection(sectionId) {
+                const targetSection = document.getElementById(sectionId);
+                if (!targetSection) return;
+                
+                // Update URL hash without page jump
+                history.pushState(null, null, `#${sectionId}`);
+                
+                // Update active state of sidebar links
+                sidebarLinks.forEach(link => {
+                    const isActive = link.getAttribute('data-section') === sectionId;
+                    link.classList.toggle('bg-blue-50', isActive);
+                    link.classList.toggle('text-blue-700', isActive);
+                    link.classList.toggle('text-gray-600', !isActive);
+                });
+                
+                // Show/hide content sections
+                contentSections.forEach(section => {
+                    section.classList.toggle('is-active', section.id === sectionId);
+                });
+            }
+            
+            // Handle sidebar link clicks
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showSection(link.getAttribute('data-section'));
+                });
+            });
+            
+            // Handle initial load with hash
+            if (window.location.hash) {
+                showSection(window.location.hash.substring(1));
+            }
+            
+            // Handle browser back/forward navigation
+            window.addEventListener('popstate', () => {
+                if (window.location.hash) {
+                    showSection(window.location.hash.substring(1));
+                }
+            });
+        });
+    </script>
+
+    <main class="pt-[5.5rem] pb-8" id="mainContent">
+        <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row gap-6">
+            <!-- Sidebar -->
+            <div class="w-full md:w-1/4">
+                <div class="bg-white rounded-lg shadow p-4">
+                    <nav class="space-y-1">
+                        <a href="#" class="bg-blue-50 text-blue-700 group flex items-center px-3 py-2 text-sm font-medium rounded-md is-active" data-section="money-transfer">
+                            Money Transfer
+                        </a>
+                        <a href="#" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium rounded-md" data-section="bookkeeping">
+                            Bookkeeping & Payroll
+                        </a>
+                        <a href="#" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium rounded-md" data-section="tax-filing">
+                            Tax Filing
+                        </a>
+                        <a href="#" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium rounded-md" data-section="shopping">
+                            Shopping
+                        </a>
+                        <a href="#" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium rounded-md" data-section="cleaning">
+                            Cleaning Services
+                        </a>
+                        <a href="#" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium rounded-md" data-section="marketing">
+                            Marketing & Promotion
+                        </a>
+                        <a href="#" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium rounded-md" data-section="uscis">
+                            USCIS Support
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="w-full md:w-3/4">
+                <!-- Money Transfer Section -->
+                <div id="money-transfer" class="content-section is-active">
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h1 class="text-3xl font-bold text-gray-900">International Money Transfers</h1>
+                            <div class="mt-2 text-lg text-gray-600">Send money around the world—quickly, safely, and affordably.</div>
+                            
+                            <div class="mt-6">
+                                <p class="text-gray-700">Whether you're supporting family, paying tuition, funding a business, or helping during emergencies, we make international money transfers simple and reliable. With a focus on speed, security, and great exchange rates, we help you stay connected to loved ones wherever they are.</p>
+                                
+                                <button class="mt-6 bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 px-6 rounded-md">
+                                    Send Money Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Featured Countries -->
+                    <div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h2 class="text-xl font-semibold text-gray-900">🌍 Featured Countries</h2>
+                            <p class="mt-2 text-gray-700">We specialize in transfers to:</p>
+                            <ul class="mt-4 space-y-3">
+                                <li class="flex items-start">
+                                    <span class="mr-2">🇪🇹</span>
+                                    <span class="text-gray-700">Ethiopia – Send money to Telebir, All banks and local pickup points with competitive exchange rates.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="mr-2">🇺🇬</span>
+                                    <span class="text-gray-700">Uganda – Fast transfers to mobile wallets (MTN, Airtel) and banks.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="mr-2">🇰🇪</span>
+                                    <span class="text-gray-700">Kenya – Instant delivery to cash pickup locations.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="mr-2">🇪🇬</span>
+                                    <span class="text-gray-700">Egypt – Reliable bank transfers and secure cash pickup options.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Why Choose Us -->
+                    <div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h2 class="text-xl font-semibold text-gray-900">Why Choose Us?</h2>
+                            <ul class="mt-4 space-y-3">
+                                <li class="flex items-start">
+                                    <div class="flex-shrink-0 h-5 w-5 text-blue-500">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <p class="ml-2 text-gray-700">Fast Transfers – Most transactions are completed within minutes.</p>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="flex-shrink-0 h-5 w-5 text-blue-500">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <p class="ml-2 text-gray-700">Low Fees – Transparent pricing with no hidden charges.</p>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="flex-shrink-0 h-5 w-5 text-blue-500">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <p class="ml-2 text-gray-700">Best Exchange Rates – Get more value for your money.</p>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="flex-shrink-0 h-5 w-5 text-blue-500">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <p class="ml-2 text-gray-700">Secure & Compliant – Your funds and data are protected at every step.</p>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="flex-shrink-0 h-5 w-5 text-blue-500">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <p class="ml-2 text-gray-700">Flexible Delivery – Bank deposit, mobile wallet, or cash pickup options available.</p>
+                                </li>
+                            </ul>
+                            
+                            <div class="mt-6">
+                                <h3 class="text-lg font-medium text-gray-900">💼 Perfect For:</h3>
+                                <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="bg-blue-50 p-3 rounded-lg">
+                                        <p class="text-gray-700">Families supporting relatives back home</p>
+                                    </div>
+                                    <div class="bg-blue-50 p-3 rounded-lg">
+                                        <p class="text-gray-700">Students paying fees abroad</p>
+                                    </div>
+                                    <div class="bg-blue-50 p-3 rounded-lg">
+                                        <p class="text-gray-700">Small businesses with international partners</p>
+                                    </div>
+                                    <div class="bg-blue-50 p-3 rounded-lg">
+                                        <p class="text-gray-700">Emergency assistance and remittances</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Online/In-Person -->
+                    <div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h2 class="text-xl font-semibold text-gray-900">📲 Send Online or In-Person</h2>
+                            <p class="mt-2 text-gray-700">You can send money easily through our secure online platform or visit one of our partner locations for in-person service. We offer 24/7 support to ensure your transfer is always smooth and hassle-free.</p>
+                            
+                            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-white p-6 rounded-lg shadow">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">S</div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900">Sam</p>
+                                            <p class="text-sm text-gray-500">Ethiopian expat in Minnesota</p>
+                                        </div>
+                                    </div>
+                                    <p class="mt-4 text-gray-700 italic">"I send money to my parents in Addis every month. It always arrives on time, and they can pick it up without any stress."</p>
+                                </div>
+                                
+                                <div class="bg-white p-6 rounded-lg shadow">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">M</div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900">Meseret</p>
+                                            <p class="text-sm text-gray-500">Nurse in Minnesota</p>
+                                        </div>
+                                    </div>
+                                    <p class="mt-4 text-gray-700 italic">"Bank transfer to Ethiopia take less than 5 minutes. Best rates and always reliable."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bookkeeping Section -->
+                <div id="bookkeeping" class="content-section">
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h1 class="text-3xl font-bold text-gray-900">Bookkeeping and Payroll</h1>
+                            <p class="mt-2 text-lg text-gray-600">Keep Your Business Organized, Compliant, and Profitable</p>
+                            
+                            <div class="mt-6">
+                                <p class="text-gray-700">Running a business is demanding—your finances shouldn't add to the stress. Our Bookkeeping and Payroll Services are designed to help small and medium-sized businesses stay on top of their numbers, pay employees on time, and remain compliant with tax laws and reporting requirements.</p>
+                                <p class="mt-4 text-gray-700">Whether you're a freelancer, entrepreneur, or growing business, we offer accurate, efficient, and affordable solutions so you can focus on what matters: growing your business.</p>
+                                
+                                <button class="mt-6 bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 px-6 rounded-md">
+                                    Make Appointment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h2 class="text-xl font-semibold text-gray-900">✅ What We Offer</h2>
+                            
+                            <h3 class="mt-4 text-lg font-medium text-gray-900">💼 Payroll Management</h3>
+                            <ul class="mt-2 space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">Employee payroll processing (weekly, biweekly, or monthly)</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">Direct deposit setup</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">W-2, W-3, and 1099 filing</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">Federal and state tax withholding & filings</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">Year-end reports and tax documentation</span>
+                                </li>
+                            </ul>
+                            
+                            <h3 class="mt-6 text-lg font-medium text-gray-900">🧾 Bookkeeping Services</h3>
+                            <ul class="mt-2 space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">Monthly income and expense tracking</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">General ledger maintenance</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">Bank and credit card reconciliation</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h2 class="text-xl font-semibold text-gray-900">Why Choose Us?</h2>
+                            <ul class="mt-4 space-y-3">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">Accurate & Timely: Avoid costly errors and missed deadlines.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">Affordable Plans: Services tailored to your business size and needs.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">Tax-Ready Reports: Clean books make tax filing easier and faster.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">Secure & Confidential: Your business data is handled with care and strict privacy.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">Human Support: Get help from real professionals when you need it.</span>
+                                </li>
+                            </ul>
+                            
+                            <h3 class="mt-6 text-lg font-medium text-gray-900">Who We Serve:</h3>
+                            <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-blue-50 p-3 rounded-lg">
+                                    <p class="text-gray-700">Small businesses & startups</p>
+                                </div>
+                                <div class="bg-blue-50 p-3 rounded-lg">
+                                    <p class="text-gray-700">Freelancers & consultants</p>
+                                </div>
+                                <div class="bg-blue-50 p-3 rounded-lg">
+                                    <p class="text-gray-700">Nonprofits</p>
+                                </div>
+                                <div class="bg-blue-50 p-3 rounded-lg">
+                                    <p class="text-gray-700">Independent contractors</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tax Filing Section -->
+                <div id="tax-filing" class="content-section">
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h1 class="text-3xl font-bold text-gray-900">Tax Filing</h1>
+                            <p class="mt-2 text-lg text-gray-600">Accurate. Fast. Reliable.</p>
+                            
+                            <div class="mt-6">
+                                <p class="text-gray-700">Let our experienced professionals handle your tax returns—whether you're an individual, small business, or self-employed. We ensure compliance, maximize your deductions, and file on time.</p>
+                                
+                                <button class="mt-6 bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 px-6 rounded-md">
+                                    Make Appointment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h2 class="text-xl font-semibold text-gray-900">Worry-Free Tax Filing for Individuals & Businesses</h2>
+                            <p class="mt-2 text-gray-700">Don't stress about deadlines or missing deductions. We take the hassle out of tax season by preparing and filing your returns correctly, saving you time and money while keeping you compliant.</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h2 class="text-xl font-semibold text-gray-900">Smart Tax Solutions for Your Business</h2>
+                            <p class="mt-2 text-gray-700">From quarterly estimates to year-end filings, we help business owners stay on track. Our experts handle income taxes, 1099s, and payroll tax filings, so you can focus on growth—not paperwork.</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h2 class="text-xl font-semibold text-gray-900">Complete Tax Filing Services:</h2>
+                            <ul class="mt-4 space-y-3">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">Federal & State Income Tax Filing</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">W-2 Preparation and Filing for Employers</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">1099/1096 Filing for Contractors</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">Self-Employed / Gig Worker Taxes</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">ITIN Applications and Renewals</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">Prior-Year Amendments</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                    <span class="text-gray-700">IRS Audit Response & Support</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h2 class="text-xl font-semibold text-gray-900">Tax Filing Support for Everyone</h2>
+                            <p class="mt-2 text-gray-700">New to the U.S. tax system? We specialize in helping immigrants and international clients with ITINs, foreign income, and first-time filings—explained in simple terms, and in your language.</p>
+                            <button class="mt-6 bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 px-6 rounded-md">
+                                Upload Documents
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shopping Section -->
+                <div id="shopping" class="content-section">
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h1 class="text-3xl font-bold text-gray-900">Shopping</h1>
+                            <p class="mt-2 text-lg text-gray-600">Shopping made easy</p>
+                            
+                            <div class="mt-6">
+                                <p class="text-gray-700">We're redirecting you to Kenagebeya.com for all your shopping needs.</p>
+                                
+                                <a href="https://kenagebeya.com" target="_blank" class="mt-6 inline-block bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 px-6 rounded-md">
+                                    Visit Kenagebeya.com
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cleaning Services Section -->
+                <div id="cleaning" class="content-section">
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h1 class="text-3xl font-bold text-gray-900">Cleaning Services</h1>
+                            <p class="mt-2 text-lg text-gray-600">Professional cleaning for homes and businesses</p>
+                            
+                            <div class="mt-6">
+                                <p class="text-gray-700">Our professional cleaning team provides thorough, reliable service for both residential and commercial properties. We use eco-friendly products and pay attention to every detail.</p>
+                                
+                                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <h3 class="text-lg font-medium text-gray-900">Residential Cleaning</h3>
+                                        <ul class="mt-2 space-y-2 text-gray-700">
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Regular home cleaning</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Deep cleaning</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Move-in/move-out cleaning</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Post-construction cleaning</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Seasonal cleaning</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-medium text-gray-900">Commercial Cleaning</h3>
+                                        <ul class="mt-2 space-y-2 text-gray-700">
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Office cleaning</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Retail space cleaning</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Special event cleaning</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Medical facility cleaning</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Restaurant cleaning</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+                                    <div class="p-6">
+                                        <h2 class="text-xl font-semibold text-gray-900">Our Cleaning Standards</h2>
+                                        <ul class="mt-4 space-y-3">
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Trained, background-checked professionals</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">EPA-approved eco-friendly cleaning products</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Customizable cleaning checklists</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Flexible scheduling (one-time or recurring)</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">100% satisfaction guarantee</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="bg-white p-6 rounded-lg shadow">
+                                        <div class="flex items-center">
+                                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">A</div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">Alem</p>
+                                                <p class="text-sm text-gray-500">Restaurant owner in Minneapolis</p>
+                                            </div>
+                                        </div>
+                                        <p class="mt-4 text-gray-700 italic">"Our kitchen has never been cleaner. They understand health department requirements and do an amazing job."</p>
+                                    </div>
+                                    
+                                    <div class="bg-white p-6 rounded-lg shadow">
+                                        <div class="flex items-center">
+                                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">T</div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">Tigist</p>
+                                                <p class="text-sm text-gray-500">Busy professional in St. Paul</p>
+                                            </div>
+                                        </div>
+                                        <p class="mt-4 text-gray-700 italic">"I come home to a spotless apartment every Thursday. It's the best investment in my peace of mind."</p>
+                                    </div>
+                                </div>
+                                
+                                <button class="mt-6 bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 px-6 rounded-md">
+                                    Schedule Service
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Marketing & Promotion Section -->
+                <div id="marketing" class="content-section">
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h1 class="text-3xl font-bold text-gray-900">Marketing & Promotion</h1>
+                            <p class="mt-2 text-lg text-gray-600">Grow your business with our expert marketing services</p>
+                            
+                            <div class="mt-6">
+                                <p class="text-gray-700">Our marketing team specializes in helping small businesses reach their target audience through strategic campaigns, social media management, and branding services. We understand the unique challenges faced by immigrant entrepreneurs and small businesses in reaching diverse communities.</p>
+                                
+                                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="bg-blue-50 p-4 rounded-lg">
+                                        <h3 class="font-medium text-gray-900">Social Media</h3>
+                                        <ul class="mt-2 space-y-2 text-gray-700">
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Content creation & curation</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Platform-specific strategies</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Community engagement</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Analytics & reporting</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-blue-50 p-4 rounded-lg">
+                                        <h3 class="font-medium text-gray-900">Branding</h3>
+                                        <ul class="mt-2 space-y-2 text-gray-700">
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Logo & visual identity design</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Brand messaging & positioning</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Multilingual branding</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Print & digital collateral</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-blue-50 p-4 rounded-lg">
+                                        <h3 class="font-medium text-gray-900">Advertising</h3>
+                                        <ul class="mt-2 space-y-2 text-gray-700">
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Google & social media ads</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Ethnic media placement</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Local community outreach</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span>Performance tracking</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+                                    <div class="p-6">
+                                        <h2 class="text-xl font-semibold text-gray-900">Why Our Marketing Works</h2>
+                                        <ul class="mt-4 space-y-3">
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Cultural understanding - We speak your language and understand your community</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Cost-effective solutions tailored to small business budgets</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Multilingual content creation</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Focus on measurable results</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="bg-white p-6 rounded-lg shadow">
+                                        <div class="flex items-center">
+                                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">E</div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">Eden</p>
+                                                <p class="text-sm text-gray-500">Restaurant Owner</p>
+                                            </div>
+                                        </div>
+                                        <p class="mt-4 text-gray-700 italic">"Our social media following grew by 300% in 3 months. Now we're getting customers from all over the metro area!"</p>
+                                    </div>
+                                    
+                                    <div class="bg-white p-6 rounded-lg shadow">
+                                        <div class="flex items-center">
+                                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">D</div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">Daniel</p>
+                                                <p class="text-sm text-gray-500">Retail Shop Owner</p>
+                                            </div>
+                                        </div>
+                                        <p class="mt-4 text-gray-700 italic">"The branding package helped us stand out in our community. Our sales increased by 40% after the rebrand."</p>
+                                    </div>
+                                </div>
+                                
+                                <button class="mt-6 bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 px-6 rounded-md">
+                                    Get Marketing Consultation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- USCIS Support Section -->
+                <div id="uscis" class="content-section">
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="p-6">
+                            <h1 class="text-3xl font-bold text-gray-900">USCIS Support</h1>
+                            <p class="mt-2 text-lg text-gray-600">Expert guidance through immigration processes</p>
+                            
+                            <div class="mt-6">
+                                <p class="text-gray-700">Navigating U.S. immigration can be complex. Our experienced team provides comprehensive support for USCIS applications and petitions, including form preparation, document review, and case tracking. We specialize in helping immigrants from East Africa and other regions with their unique immigration needs.</p>
+                                
+                                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h2 class="text-xl font-semibold text-gray-900">Common Services</h2>
+                                        <ul class="mt-4 space-y-3">
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Form I-485 (Adjustment of Status)</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Form I-130 (Petition for Alien Relative)</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Form N-400 (Naturalization)</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Form I-765 (Employment Authorization)</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Form I-131 (Travel Document)</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Form I-90 (Green Card Renewal)</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-xl font-semibold text-gray-900">Our Process</h2>
+                                        <ol class="mt-4 space-y-3 list-decimal list-inside text-gray-700">
+                                            <li>Initial consultation to assess your situation</li>
+                                            <li>Document checklist and preparation</li>
+                                            <li>Form completion and review</li>
+                                            <li>Submission and case tracking</li>
+                                            <li>Interview preparation</li>
+                                            <li>Follow-up and status updates</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+                                    <div class="p-6">
+                                        <h2 class="text-xl font-semibold text-gray-900">Why Choose Us?</h2>
+                                        <ul class="mt-4 space-y-3">
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Experienced with East African immigration cases</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Multilingual support (Amharic, Oromo, Somali available)</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Affordable flat-fee pricing</span>
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-blue-500 mt-1 mr-2"></i>
+                                                <span class="text-gray-700">Personalized case management</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="bg-white p-6 rounded-lg shadow">
+                                        <div class="flex items-center">
+                                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">A</div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">Abdi</p>
+                                                <p class="text-sm text-gray-500">Green Card Holder</p>
+                                            </div>
+                                        </div>
+                                        <p class="mt-4 text-gray-700 italic">"They helped me adjust my status after my asylum was approved. The interview preparation was especially helpful."</p>
+                                    </div>
+                                    
+                                    <div class="bg-white p-6 rounded-lg shadow">
+                                        <div class="flex items-center">
+                                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">M</div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">Meron</p>
+                                                <p class="text-sm text-gray-500">Citizenship Applicant</p>
+                                            </div>
+                                        </div>
+                                        <p class="mt-4 text-gray-700 italic">"The naturalization process was smooth thanks to their guidance. I passed my interview on the first try!"</p>
+                                    </div>
+                                </div>
+                                
+                                <button class="mt-6 bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 px-6 rounded-md">
+                                    Schedule Consultation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+     <footer class="bg-gradient-to-r from-blue-800 to-blue-600 text-white py-8 border-t border-blue-700">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="flex space-x-6 mb-4 md:mb-0">
+                    <a href="#" class="text-indigo-200 hover:text-white transition-colors">Privacy</a>
+                    <a href="#" class="text-indigo-200 hover:text-white transition-colors">Security</a>
+                    <a href="#" class="text-indigo-200 hover:text-white transition-colors">Legal</a>
+                    <a href="#" class="text-indigo-200 hover:text-white transition-colors">Contact</a>
+                </div>
+                <div class="flex space-x-6 mb-4 md:mb-0">
+                    <a href="#" class="text-white hover:text-indigo-200 transition-colors">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="text-white hover:text-indigo-200 transition-colors">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="text-white hover:text-indigo-200 transition-colors">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="#" class="text-white hover:text-indigo-200 transition-colors">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+                <div class="text-sm text-indigo-200">
+                    &copy; 2025 A&T Services. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script>
+        // Scroll to top on load and handle user menu
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ensure content is visible on load
+            document.getElementById('mainContent').scrollIntoView();
+            
+            const ratesContainer = document.getElementById('exchangeRates');
+            if (!ratesContainer) return;
+            
+            // Default rates
+            const defaultRates = [
+                '🇪🇹 55.5 ETB', '🇺🇬 3700 UGX', '🇰🇪 120 KES', '🇪🇬 30.8 EGP',
+                '🇳🇬 450 NGN', '🇬🇭 6.2 GHS', '🇿🇦 18.5 ZAR', '🇹🇿 2300 TZS',
+                '🇷🇼 1050 RWF', '🇸🇩 55 SDG', '🇩🇿 135 DZD', '🇲🇦 10.2 MAD',
+                '🇧🇯 600 XOF', '🇨🇲 600 XAF', '🇿🇲 20 ZMW', '🇲🇼 850 MWK',
+                '🇸🇿 18.5 SZL', '🇱🇸 18.5 LSL', '🇧🇮 2050 BIF', '🇩🇯 180 DJF',
+                '🇲🇺 45 MUR', '🇸🇨 14 SCR', '🇰🇲 450 KMF', '🇸🇹 23 STN',
+                '🇨🇩 2050 CDF', '🇬🇲 55 GMD', '🇬🇳 9500 GNF', '🇱🇷 190 LRD',
+                '🇲🇷 40 MRO', '🇸🇱 12000 SLL', '🇸🇴 580 SOS', '🇸🇸 130 SSP',
+                '🇦🇴 550 AOA', '🇲🇿 65 MZN', '🇳🇦 18.5 NAD', '🇿🇼 330 ZWL'
+            ].join(' &nbsp;&nbsp;&nbsp;&nbsp; ');
+
+            // Set initial content (duplicated for continuous scrolling)
+            ratesContainer.innerHTML = defaultRates + ' &nbsp;&nbsp;&nbsp;&nbsp; ' + defaultRates;
+
+            // Optional: Periodically update rates without resetting marquee
+            setInterval(() => {
+                fetch('https://api.exchangerate-api.com/v4/latest/USD')
+                    .then(response => response.json())
+                    .then(data => {
+                        const countries = [
+                            {code: 'ETB', flag: '🇪🇹'}, {code: 'UGX', flag: '🇺🇬'},
+                            {code: 'KES', flag: '🇰🇪'}, {code: 'EGP', flag: '🇪🇬'},
+                            {code: 'NGN', flag: '🇳🇬'}, {code: 'GHS', flag: '🇬🇭'},
+                            {code: 'ZAR', flag: '🇿🇦'}, {code: 'TZS', flag: '🇹🇿'},
+                            {code: 'RWF', flag: '🇷🇼'}, {code: 'SDG', flag: '🇸🇩'},
+                            {code: 'DZD', flag: '🇩🇿'}, {code: 'MAD', flag: '🇲🇦'},
+                            {code: 'XOF', flag: '🇧🇯'}, {code: 'XAF', flag: '🇨🇲'},
+                            {code: 'ZMW', flag: '🇿🇲'}, {code: 'MWK', flag: '🇲🇼'},
+                            {code: 'SZL', flag: '🇸🇿'}, {code: 'LSL', flag: '🇱🇸'},
+                            {code: 'BIF', flag: '🇧🇮'}, {code: 'DJF', flag: '🇩🇯'},
+                            {code: 'MUR', flag: '🇲🇺'}, {code: 'SCR', flag: '🇸🇨'},
+                            {code: 'KMF', flag: '🇰🇲'}, {code: 'STN', flag: '🇸🇹'},
+                            {code: 'CDF', flag: '🇨🇩'}, {code: 'GMD', flag: '🇬🇲'},
+                            {code: 'GNF', flag: '🇬🇳'}, {code: 'LRD', flag: '🇱🇷'},
+                            {code: 'MRO', flag: '🇲🇷'}, {code: 'SLL', flag: '🇸🇱'},
+                            {code: 'SOS', flag: '🇸🇴'}, {code: 'SSP', flag: '🇸🇸'},
+                            {code: 'AOA', flag: '🇦🇴'}, {code: 'MZN', flag: '🇲🇿'},
+                            {code: 'NAD', flag: '🇳🇦'}, {code: 'ZWL', flag: '🇿🇼'}
+                        ];
+
+                        const ratesText = countries.map(country => {
+                            const rate = data.rates[country.code] ? (1 / data.rates[country.code]).toFixed(2) : '--';
+                            return `${country.flag} ${rate} ${country.code}`;
+                        }).join(' &nbsp;&nbsp;&nbsp;&nbsp; ');
+
+                        // Only update if content changed
+                        if (ratesContainer.innerHTML.indexOf(ratesText) === -1) {
+                            ratesContainer.innerHTML = ratesText + ' &nbsp;&nbsp;&nbsp;&nbsp; ' + ratesText;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching exchange rates:', error);
+                    });
+            }, 300000); // Update every 5 minutes
+
+            // Mobile menu toggle - only if elements exist
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+
+                // Close menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    const isClickInside = mobileMenu.contains(e.target) || mobileMenuButton.contains(e.target);
+                    if (!isClickInside && !mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Section switching functionality
+            const sidebarLinks = document.querySelectorAll('[data-section]');
+            const contentSections = document.querySelectorAll('.content-section');
+            
+            function showSection(sectionId) {
+                const targetSection = document.getElementById(sectionId);
+                if (!targetSection) return;
+                
+                window.location.hash = sectionId;
+                
+                sidebarLinks.forEach(link => {
+                    link.classList.toggle('bg-blue-50', link.getAttribute('data-section') === sectionId);
+                    link.classList.toggle('text-blue-700', link.getAttribute('data-section') === sectionId);
+                    link.classList.toggle('text-gray-600', link.getAttribute('data-section') !== sectionId);
+                });
+                
+                contentSections.forEach(section => {
+                    section.classList.remove('is-active');
+                });
+                targetSection.classList.add('is-active');
+            }
+            
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showSection(link.getAttribute('data-section'));
+                });
+            });
+            
+            if (window.location.hash) {
+                const sectionFromHash = window.location.hash.substring(1);
+                showSection(sectionFromHash);
+            }
+        });
+    </script>
+   
+</body>
+</html>
